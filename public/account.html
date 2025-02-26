@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Bookstore</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main>
+        <section id="auth" class="auth-container">
+            <div class="auth-card">
+                <h2>Login</h2>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Login</button>
+                </form>
+                <p id="login-message" class="message"></p>
+            </div>
+            <div class="auth-card">
+                <h2>Register</h2>
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-firstName">First Name</label>
+                        <input type="text" id="register-firstName" placeholder="Enter your first name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-lastName">Last Name</label>
+                        <input type="text" id="register-lastName" placeholder="Enter your last name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Register</button>
+                </form>
+                <p id="register-message" class="message"></p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bookstore</p>
+    </footer>
+    <script src="include-header.js"></script>
+    <script src="toast.js"></script>
+    <script src="account.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            document.getElementById('login-message').textContent = 'Logged in successfully!';
+            document.getElementById('login-message').style.color = '#28a745';
+            showToast('Logged in successfully!');
+            if (data.isAdmin) {
+                setTimeout(() => window.location.href = '/admin', 1000);
+            } else {
+                setTimeout(() => window.location.href = '/', 1000);
+            }
+        } else {
+            document.getElementById('login-message').textContent = data.error || 'Login failed.';
+            document.getElementById('login-message').style.color = '#dc3545';
+            showToast(data.error || 'Login failed.', 'error');
+        }
+    } catch (error) {
+        document.getElementById('login-message').textContent = 'An error occurred.';
+        document.getElementById('login-message').style.color = '#dc3545';
+        showToast('An error occurred.', 'error');
+    }
+});
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const firstName = document.getElementById('register-firstName').value;
+    const lastName = document.getElementById('register-lastName').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstName, lastName, email, password })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            document.getElementById('register-message').textContent = 'Registered successfully! Please log in.';
+            document.getElementById('register-message').style.color = '#28a745';
+            showToast('Registered successfully!');
+        } else {
+            document.getElementById('register-message').textContent = data.error || 'Registration failed.';
+            document.getElementById('register-message').style.color = '#dc3545';
+            showToast(data.error || 'Registration failed.', 'error');
+        }
+    } catch (error) {
+        document.getElementById('register-message').textContent = 'An error occurred.';
+        document.getElementById('register-message').style.color = '#dc3545';
+        showToast('An error occurred.', 'error');
+    }
+});
