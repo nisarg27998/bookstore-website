@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
         books: [{ bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' }, quantity: Number }],
         date: { type: Date, default: Date.now },
         total: Number
-    }]
+    }],
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] // New wishlist field
 });
 
 module.exports = mongoose.model('User', userSchema);

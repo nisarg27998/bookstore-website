@@ -10,7 +10,17 @@
     <main>
         <section id="orders">
             <h2>Your Orders</h2>
-            <div id="order-list"></div>
+            <table id="order-table">
+                <thead>
+                    <tr>
+                        <th>Order Date</th>
+                        <th>Books</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="order-list"></tbody>
+            </table>
+            <p id="no-orders-message" style="display: none;">You have no past orders.</p>
         </section>
     </main>
     <footer>

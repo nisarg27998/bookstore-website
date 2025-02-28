@@ -1,12 +1,21 @@
 <header>
     <h1>Bookstore</h1>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/cart">Cart</a>
-        <a href="/account">Account</a>
-        <a href="/orders" style="display: none;">Orders</a>
-        <a href="/admin" style="display: none;">Admin</a>
-        <button id="logout-btn" style="display: none;">Logout</button>
-    </nav>
+    <div class="header-content">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/cart">Cart</a>
+            <a href="/account">Account</a>
+            <a href="/profile" style="display: none;">Profile</a>
+            <a href="/orders" style="display: none;">Orders</a>
+            <a href="/admin" style="display: none;">Admin</a>
+            <button id="logout-btn" style="display: none;">Logout</button>
+        </nav>
+        <div class="search-filter">
+            <input type="text" id="search-input" placeholder="Search by title...">
+            <select id="genre-filter">
+                <option value="">All Genres</option>
+            </select>
+        </div>
+    </div>
     <span id="username-display" style="display: none;"></span>
 </header>

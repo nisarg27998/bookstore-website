@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Bookstore</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main>
+        <section id="profile" class="profile-container">
+            <h2>Your Profile</h2>
+            <div class="profile-tabs">
+                <button class="tab-button active" data-tab="details">Details</button>
+                <button class="tab-button" data-tab="orders">Orders</button>
+                <button class="tab-button" data-tab="wishlist">Wishlist</button>
+            </div>
+            <div id="details" class="tab-content active">
+                <form id="profile-form" class="profile-form">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">New Password (leave blank to keep current)</label>
+                        <input type="password" id="password">
+                    </div>
+                    <button type="submit" class="profile-button">Save Changes</button>
+                </form>
+                <p id="profile-message" class="message"></p>
+            </div>
+            <div id="orders" class="tab-content">
+                <table id="order-table">
+                    <thead>
+                        <tr>
+                            <th>Order Date</th>
+                            <th>Books</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-list"></tbody>
+                </table>
+                <p id="no-orders-message" style="display: none;">You have no past orders.</p>
+            </div>
+            <div id="wishlist" class="tab-content">
+                <div id="wishlist-container"></div>
+                <p id="no-wishlist-message" style="display: none;">Your wishlist is empty.</p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bookstore</p>
+    </footer>
+    <script src="include-header.js"></script>
+    <script src="toast.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>

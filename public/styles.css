@@ -19,10 +19,16 @@ nav a {
     margin: 0 10px;
     text-decoration: none;
     color: #007BFF;
+    transition: color 0.3s ease, font-weight 0.3s ease; /* Smooth transition */
 }
 
 nav a:hover {
     text-decoration: underline;
+}
+
+nav a.active {
+    color: #0056b3; /* Darker blue for active state */
+    font-weight: bold;
 }
 
 #username-display {
@@ -96,10 +102,11 @@ main {
     background-color: #0056b3;
 }
 
+/* Book cover */
 .book-cover {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
+    height: 200px; /* Fixed height for consistency */
+    object-fit: cover; /* Maintain aspect ratio, crop if needed */
     border-radius: 4px;
     margin-bottom: 10px;
 }
@@ -467,4 +474,407 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+}
+
+/* Orders page */
+#orders {
+    max-width: 1000px;
+    margin: 20px auto;
+}
+
+#order-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+#order-table th, #order-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#order-table th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: bold;
+}
+
+#order-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+#order-table ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#no-orders-message {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Ensure responsiveness */
+@media (max-width: 768px) {
+    #order-table th, #order-table td {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    #order-table ul {
+        padding-left: 15px;
+    }
+}
+
+/* Search and filter */
+.search-filter {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+#search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    transition: border-color 0.3s ease;
+}
+
+#search-input:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+#genre-filter {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 200px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#genre-filter:focus {
+    border-color: #007BFF;
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .search-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #search-input, #genre-filter {
+        max-width: 100%;
+    }
+}
+
+/* Update #book-list to target #book-container */
+#book-list {
+    padding: 20px;
+}
+
+#book-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Welcome section */
+#welcome {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #fff;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#welcome h1 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+#welcome p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Book list container */
+.book-list-container {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.book-list-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#book-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Remove redundant #book-list styles */
+#book-list {
+    /* No additional styles needed here anymore */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #welcome {
+        padding: 20px;
+    }
+    .book-list-container {
+        padding: 15px;
+    }
+    #book-container {
+        gap: 15px;
+    }
+}
+
+.profile-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.profile-tabs {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007BFF;
+    color: #007BFF;
+    font-weight: bold;
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #e9ecef;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.profile-button {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.profile-button:hover {
+    background-color: #0056b3;
+}
+
+.wishlist-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 350px; /* Match homepage card height */
+    justify-content: space-between;
+}
+
+.wishlist-item button {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.wishlist-item button:hover {
+    background-color: #b02a37;
+}
+
+#no-wishlist-message {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .profile-tabs {
+        flex-direction: column;
+    }
+    .tab-button {
+        padding: 15px;
+    }
+    .wishlist-item {
+        width: 100%;
+    }
+}
+
+/* Book card */
+.book-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.book-modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh; /* Limit height to 80% of viewport */
+    overflow-y: auto; /* Enable vertical scrolling */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.modal-book-cover {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.book-modal-content h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+.book-modal-content p {
+    margin: 10px 0;
+    color: #666;
+}
+
+.book-modal-content strong {
+    color: #333;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-buttons button:hover {
+    background-color: #0056b3;
+}
+
+.modal-buttons button:nth-child(2) {
+    background-color: #28a745;
+}
+
+.modal-buttons button:nth-child(2):hover {
+    background-color: #218838;
 }

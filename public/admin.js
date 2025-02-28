@@ -18,7 +18,9 @@ document.getElementById('add-book-form').addEventListener('submit', async (e) =>
         genre: document.getElementById('genre').value,
         price: parseFloat(document.getElementById('price').value),
         stock: parseInt(document.getElementById('stock').value),
-        coverUrl: document.getElementById('coverUrl').value || undefined
+        coverUrl: document.getElementById('coverUrl').value || undefined,
+        description: document.getElementById('description').value,
+        authorBio: document.getElementById('authorBio').value
     };
 
     try {
@@ -29,7 +31,7 @@ document.getElementById('add-book-form').addEventListener('submit', async (e) =>
         });
 
         if (response.ok) {
-            document.getElementById('message').textContent = `Book added successfully! Price: ${currencySymbol}${bookData.price.toFixed(2)}`;
+            document.getElementById('message').textContent = `Book added successfully! Price: ${window.currencySymbol}${bookData.price.toFixed(2)}`;
             e.target.reset();
             loadBooks();
         } else {
@@ -65,7 +67,7 @@ async function loadBooks() {
     }
 }
 
-function showEditModal(bookId, title, author, genre, price, stock, coverUrl) {
+function showEditModal(bookId, title, author, genre, price, stock, coverUrl, description, authorBio) {
     const modal = document.getElementById('edit-modal');
     const form = document.getElementById('edit-book-form');
     
@@ -82,6 +84,10 @@ function showEditModal(bookId, title, author, genre, price, stock, coverUrl) {
         <input type="number" id="edit-stock" value="${stock}" required><br>
         <label for="edit-coverUrl">Cover URL:</label>
         <input type="url" id="edit-coverUrl" value="${coverUrl}" placeholder="https://example.com/cover.jpg"><br>
+        <label for="edit-description">Description:</label>
+        <textarea id="edit-description" rows="4">${description || ''}</textarea><br>
+        <label for="edit-authorBio">Author Bio:</label>
+        <textarea id="edit-authorBio" rows="4">${authorBio || ''}</textarea><br>
         <button type="submit">Save Changes</button>
         <button type="button" onclick="hideEditModal()">Cancel</button>
     `;
@@ -97,7 +103,9 @@ function showEditModal(bookId, title, author, genre, price, stock, coverUrl) {
             genre: document.getElementById('edit-genre').value,
             price: parseFloat(document.getElementById('edit-price').value),
             stock: parseInt(document.getElementById('edit-stock').value),
-            coverUrl: document.getElementById('edit-coverUrl').value || undefined
+            coverUrl: document.getElementById('edit-coverUrl').value || undefined,
+            description: document.getElementById('edit-description').value,
+            authorBio: document.getElementById('edit-authorBio').value
         };
 
         try {

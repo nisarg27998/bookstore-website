@@ -1,50 +1,42 @@
-function getCurrencySymbol() {
-    const testElement = document.createElement('span');
-    testElement.innerHTML = '₹';
-    document.body.appendChild(testElement);
-    const isSupported = testElement.offsetWidth > 0 && testElement.textContent === '₹';
-    document.body.removeChild(testElement);
-    return isSupported ? '₹' : 'INR ';
-}
-
-const currencySymbol = getCurrencySymbol();
-
 async function displayOrders() {
-    const orderListDiv = document.getElementById('order-list');
-    orderListDiv.innerHTML = '';
+    const orderList = document.getElementById('order-list');
+    const noOrdersMessage = document.getElementById('no-orders-message');
+    orderList.innerHTML = '';
 
     try {
         const response = await fetch('/api/orders');
         if (!response.ok) {
-            orderListDiv.innerHTML = '<p>Please log in to view your orders.</p>';
+            orderList.innerHTML = '<tr><td colspan="3">Please log in to view your orders.</td></tr>';
+            noOrdersMessage.style.display = 'none';
             return;
         }
         const orders = await response.json();
 
         if (orders.length === 0) {
-            orderListDiv.innerHTML = '<p>You have no past orders.</p>';
+            orderList.innerHTML = '';
+            noOrdersMessage.style.display = 'block';
             return;
         }
 
+        noOrdersMessage.style.display = 'none';
         orders.forEach(order => {
-            const orderDiv = document.createElement('div');
-            orderDiv.className = 'order-item';
+            const row = document.createElement('tr');
             let booksHtml = '<ul>';
             order.books.forEach(book => {
-                booksHtml += `<li>${book.bookId.title} - ${currencySymbol}${book.bookId.price.toFixed(2)} x ${book.quantity}</li>`;
+                booksHtml += `<li>${book.bookId.title} - ${window.currencySymbol}${book.bookId.price.toFixed(2)} x ${book.quantity}</li>`;
             });
             booksHtml += '</ul>';
-            orderDiv.innerHTML = `
-                <p><strong>Order Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-                ${booksHtml}
-                <p><strong>Total:</strong> ${currencySymbol}${order.total.toFixed(2)}</p>
+            row.innerHTML = `
+                <td>${new Date(order.date).toLocaleString()}</td>
+                <td>${booksHtml}</td>
+                <td>${window.currencySymbol}${order.total.toFixed(2)}</td>
             `;
-            orderListDiv.appendChild(orderDiv);
+            orderList.appendChild(row);
         });
     } catch (error) {
-        orderListDiv.innerHTML = '<p>Error loading orders.</p>';
+        orderList.innerHTML = '<tr><td colspan="3">Error loading orders.</td></tr>';
+        noOrdersMessage.style.display = 'none';
     }
 }
 
-// Display orders on page load
 displayOrders();

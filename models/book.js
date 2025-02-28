@@ -6,7 +6,13 @@ const bookSchema = new mongoose.Schema({
     genre: String,
     price: Number,
     stock: Number,
-    coverUrl: { type: String, default: 'https://via.placeholder.com/150' } // Default placeholder image
+    coverUrl: String,
+    description: String, // Detailed book description
+    authorBio: String,   // Author biography
+    ratings: {          // Average rating and count
+        average: { type: Number, default: 0 },
+        count: { type: Number, default: 0 }
+    }
 });
 
 module.exports = mongoose.model('Book', bookSchema);

@@ -1,14 +1,3 @@
-function getCurrencySymbol() {
-    const testElement = document.createElement('span');
-    testElement.innerHTML = '₹';
-    document.body.appendChild(testElement);
-    const isSupported = testElement.offsetWidth > 0 && testElement.textContent === '₹';
-    document.body.removeChild(testElement);
-    return isSupported ? '₹' : 'INR ';
-}
-
-const currencySymbol = getCurrencySymbol();
-
 async function displayCart() {
     const cartItemsDiv = document.getElementById('cart-items');
     const totalAmountSpan = document.getElementById('total-amount');
@@ -19,7 +8,7 @@ async function displayCart() {
         const response = await fetch('/api/cart');
         if (!response.ok) {
             cartItemsDiv.innerHTML = '<p>Please log in to view your cart.</p>';
-            totalAmountSpan.textContent = `${currencySymbol}0.00`;
+            totalAmountSpan.textContent = `${window.currencySymbol}0.00`;
             checkoutBtn.style.display = 'none';
             return;
         }
@@ -27,43 +16,44 @@ async function displayCart() {
 
         if (cart.length === 0) {
             cartItemsDiv.innerHTML = '<p>Your cart is empty.</p>';
-            totalAmountSpan.textContent = `${currencySymbol}0.00`;
+            totalAmountSpan.textContent = `${window.currencySymbol}0.00`;
             checkoutBtn.style.display = 'none';
             return;
         }
 
         let total = 0;
         cart.forEach(item => {
-            const itemTotal = item.bookId.price * item.quantity;
+            const quantity = item.quantity || 1; // Fallback to 1 if undefined
+            const itemTotal = item.bookId.price * quantity;
             total += itemTotal;
 
             const itemDiv = document.createElement('div');
             itemDiv.className = 'cart-item';
             itemDiv.innerHTML = `
-                <p>${item.bookId.title} - ${currencySymbol}${item.bookId.price.toFixed(2)}</p>
+                <p>${item.bookId.title} - ${window.currencySymbol}${item.bookId.price.toFixed(2)}</p>
                 <div class="quantity-controls">
-                    <button onclick="updateQuantity('${item.bookId._id}', ${item.quantity - 1})">−</button>
-                    <span>${item.quantity}</span>
-                    <button onclick="updateQuantity('${item.bookId._id}', ${item.quantity + 1})">+</button>
+                    <button onclick="updateQuantity('${item.bookId._id}', ${quantity - 1})">−</button>
+                    <span>${quantity}</span>
+                    <button onclick="updateQuantity('${item.bookId._id}', ${quantity + 1})">+</button>
                 </div>
-                <p>= ${currencySymbol}${itemTotal.toFixed(2)}</p>
+                <p>= ${window.currencySymbol}${itemTotal.toFixed(2)}</p>
                 <button onclick="removeFromCart('${item.bookId._id}')">Remove</button>
             `;
             cartItemsDiv.appendChild(itemDiv);
         });
 
-        totalAmountSpan.textContent = `${currencySymbol}${total.toFixed(2)}`;
+        totalAmountSpan.textContent = `${window.currencySymbol}${total.toFixed(2)}`;
         checkoutBtn.style.display = 'block';
     } catch (error) {
         cartItemsDiv.innerHTML = '<p>Error loading cart.</p>';
-        totalAmountSpan.textContent = `${currencySymbol}0.00`;
+        totalAmountSpan.textContent = `${window.currencySymbol}0.00`;
         checkoutBtn.style.display = 'none';
     }
 }
 
 async function updateQuantity(bookId, newQuantity) {
     if (newQuantity < 1) {
-        removeFromCart(bookId); // Remove item if quantity drops to 0
+        removeFromCart(bookId);
         return;
     }
 
@@ -75,12 +65,12 @@ async function updateQuantity(bookId, newQuantity) {
         });
         const data = await response.json();
         if (response.ok) {
-            displayCart(); // Refresh cart display
+            displayCart();
         } else {
-            alert(data.error || 'Failed to update quantity.');
+            showToast(data.error || 'Failed to update quantity.', 'error');
         }
     } catch (error) {
-        alert('An error occurred while updating quantity.');
+        showToast('An error occurred while updating quantity.', 'error');
     }
 }
 
@@ -90,10 +80,10 @@ async function removeFromCart(bookId) {
         if (response.ok) {
             displayCart();
         } else {
-            alert('Failed to remove item.');
+            showToast('Failed to remove item.', 'error');
         }
     } catch (error) {
-        alert('An error occurred.');
+        showToast('An error occurred.', 'error');
     }
 }
 
@@ -105,19 +95,18 @@ document.getElementById('checkout-btn').addEventListener('click', async () => {
         });
         const data = await response.json();
         if (response.ok) {
-            alert('Checkout successful! Your order has been placed.');
+            showToast('Checkout successful! Your order has been placed.');
             window.location.href = '/';
         } else {
             if (data.details) {
-                alert(`Checkout failed due to insufficient stock:\n${data.details.join('\n')}`);
+                showToast(`Checkout failed due to insufficient stock:\n${data.details.join('\n')}`, 'error');
             } else {
-                alert(data.error || 'Checkout failed.');
+                showToast(data.error || 'Checkout failed.', 'error');
             }
         }
     } catch (error) {
-        alert('An error occurred during checkout.');
+        showToast('An error occurred during checkout.', 'error');
     }
 });
 
-// Display cart on page load
 displayCart();

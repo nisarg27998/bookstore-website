@@ -13,18 +13,16 @@ mongoose.connect('mongodb://localhost/bookstore', { useNewUrlParser: true, useUn
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(session({
-    secret: 'your-secret-key', // Change this in production!
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false
 }));
 
-// Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
     if (req.session.userId) return next();
     res.status(401).json({ error: 'Please log in.' });
 }
 
-// Middleware to check if user is admin
 function isAdmin(req, res, next) {
     User.findById(req.session.userId).then(user => {
         if (user && user.isAdmin) return next();
@@ -32,7 +30,6 @@ function isAdmin(req, res, next) {
     }).catch(() => res.status(500).json({ error: 'Server error' }));
 }
 
-// Create default admin user on startup
 async function initializeAdminUser() {
     const adminEmail = 'admin@example.com';
     const adminPassword = 'AdminPass123';
@@ -58,12 +55,10 @@ async function initializeAdminUser() {
     }
 }
 
-// Run initialization after MongoDB connection
 mongoose.connection.once('open', () => {
     initializeAdminUser();
 });
 
-// Serve pages
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
@@ -84,13 +79,15 @@ app.get('/orders', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/orders.html'));
 });
 
-// API to get all books
+app.get('/profile', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/profile.html'));
+});
+
 app.get('/api/books', async (req, res) => {
     const books = await Book.find();
     res.json(books);
 });
 
-// API to register (regular users)
 app.post('/api/register', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
@@ -103,7 +100,7 @@ app.post('/api/register', async (req, res) => {
         await user.save();
         res.status(201).json({ message: 'User registered' });
     } catch (error) {
-        if (error.code === 11000) { // Duplicate key error (e.g., email already exists)
+        if (error.code === 11000) {
             res.status(400).json({ error: 'Email is already registered.' });
         } else {
             res.status(400).json({ error: 'Registration failed: ' + error.message });
@@ -111,7 +108,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// API to login (handles both regular users and admins)
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -123,7 +119,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// API to check user status
 app.get('/api/user-status', async (req, res) => {
     if (!req.session.userId) {
         return res.json({ isLoggedIn: false, isAdmin: false, firstName: null });
@@ -132,7 +127,6 @@ app.get('/api/user-status', async (req, res) => {
     res.json({ isLoggedIn: true, isAdmin: user.isAdmin, firstName: user.firstName });
 });
 
-// API to logout
 app.post('/api/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
@@ -142,7 +136,6 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// API to add to cart
 app.post('/api/cart', isAuthenticated, async (req, res) => {
     const { bookId, quantity } = req.body;
     const user = await User.findById(req.session.userId);
@@ -163,13 +156,11 @@ app.post('/api/cart', isAuthenticated, async (req, res) => {
     res.json({ message: 'Cart updated', cart: user.cart });
 });
 
-// API to get cart
 app.get('/api/cart', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.userId).populate('cart.bookId');
     res.json(user.cart);
 });
 
-// API to remove from cart
 app.delete('/api/cart/:bookId', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.userId);
     user.cart = user.cart.filter(item => item.bookId.toString() !== req.params.bookId);
@@ -177,7 +168,6 @@ app.delete('/api/cart/:bookId', isAuthenticated, async (req, res) => {
     res.json({ message: 'Removed from cart', cart: user.cart });
 });
 
-// API to checkout
 app.post('/api/checkout', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.userId).populate('cart.bookId');
     if (!user.cart.length) {
@@ -215,13 +205,11 @@ app.post('/api/checkout', isAuthenticated, async (req, res) => {
     res.json({ message: 'Checkout successful' });
 });
 
-// API to get orders
 app.get('/api/orders', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.userId).populate('orders.books.bookId');
     res.json(user.orders);
 });
 
-// API to add a book (admin only)
 app.post('/api/books', isAdmin, async (req, res) => {
     const { title, author, genre, price, stock, coverUrl } = req.body;
     try {
@@ -233,7 +221,6 @@ app.post('/api/books', isAdmin, async (req, res) => {
     }
 });
 
-// API to edit a book (admin only)
 app.put('/api/books/:id', isAdmin, async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
@@ -247,7 +234,6 @@ app.put('/api/books/:id', isAdmin, async (req, res) => {
     }
 });
 
-// API to delete a book (admin only)
 app.delete('/api/books/:id', isAdmin, async (req, res) => {
     const { id } = req.params;
 
@@ -258,6 +244,50 @@ app.delete('/api/books/:id', isAdmin, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete book' });
     }
+});
+
+// New profile endpoints
+app.get('/api/user', isAuthenticated, async (req, res) => {
+    const user = await User.findById(req.session.userId);
+    res.json({ firstName: user.firstName, lastName: user.lastName, email: user.email });
+});
+
+app.put('/api/user', isAuthenticated, async (req, res) => {
+    const { firstName, lastName, password } = req.body;
+    const user = await User.findById(req.session.userId);
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (password) user.password = await bcrypt.hash(password, 10);
+
+    await user.save();
+    res.json({ message: 'Profile updated' });
+});
+
+app.get('/api/wishlist', isAuthenticated, async (req, res) => {
+    const user = await User.findById(req.session.userId).populate('wishlist');
+    res.json(user.wishlist);
+});
+
+app.post('/api/wishlist/:bookId', isAuthenticated, async (req, res) => {
+    const { bookId } = req.params;
+    const user = await User.findById(req.session.userId);
+    const book = await Book.findById(bookId);
+
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+    if (!user.wishlist.includes(bookId)) {
+        user.wishlist.push(bookId);
+        await user.save();
+    }
+    res.json({ message: 'Added to wishlist' });
+});
+
+app.delete('/api/wishlist/:bookId', isAuthenticated, async (req, res) => {
+    const { bookId } = req.params;
+    const user = await User.findById(req.session.userId);
+    user.wishlist = user.wishlist.filter(id => id.toString() !== bookId);
+    await user.save();
+    res.json({ message: 'Removed from wishlist' });
 });
 
 app.listen(3000, () => {
