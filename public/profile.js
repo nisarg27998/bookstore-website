@@ -1,7 +1,3 @@
-// Remove duplicate getCurrencySymbol and currencySymbol declaration
-// Use the global window.currencySymbol instead
-
-// Tab switching function (global scope)
 function openProfileTab(tabName) {
     const tabs = document.getElementsByClassName('tab-content');
     const buttons = document.getElementsByClassName('tab-button');
@@ -53,19 +49,32 @@ async function loadOrders() {
         }
 
         noOrdersMessage.style.display = 'none';
-        orders.forEach(order => {
+        orders.forEach((order, index) => {
             const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span class="toggle-order" data-order-id="${index}">▶</span></td>
+                <td>${new Date(order.date).toLocaleString()}</td>
+                <td>${window.currencySymbol}${order.total.toFixed(2)}</td>
+            `;
+            orderList.appendChild(row);
+
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'order-details';
+            detailsRow.id = `details-${index}`;
+            detailsRow.style.display = 'none';
             let booksHtml = '<ul>';
             order.books.forEach(book => {
                 booksHtml += `<li>${book.bookId.title} - ${window.currencySymbol}${book.bookId.price.toFixed(2)} x ${book.quantity}</li>`;
             });
             booksHtml += '</ul>';
-            row.innerHTML = `
-                <td>${new Date(order.date).toLocaleString()}</td>
-                <td>${booksHtml}</td>
-                <td>${window.currencySymbol}${order.total.toFixed(2)}</td>
+            detailsRow.innerHTML = `
+                <td colspan="3">
+                    <div class="order-details-content">${booksHtml}</div>
+                </td>
             `;
-            orderList.appendChild(row);
+            orderList.appendChild(detailsRow);
+
+            row.querySelector('.toggle-order').addEventListener('click', () => toggleOrderDetails(index));
         });
     } catch (error) {
         orderList.innerHTML = '<tr><td colspan="3">Error loading orders.</td></tr>';
@@ -90,7 +99,7 @@ async function loadWishlist() {
         }
 
         noWishlistMessage.style.display = 'none';
-        wishlist.forEach(book => {
+        wishlist.forEach((book, index) => {
             const bookCard = document.createElement('div');
             bookCard.className = 'wishlist-item';
             bookCard.innerHTML = `
@@ -101,6 +110,11 @@ async function loadWishlist() {
                 <button onclick="removeFromWishlist('${book._id}')">Remove</button>
             `;
             wishlistContainer.appendChild(bookCard);
+
+            // Staggered load animation
+            setTimeout(() => {
+                bookCard.classList.add('fade-in');
+            }, index * 100); // Delay each card by 100ms
         });
     } catch (error) {
         wishlistContainer.innerHTML = '<p>Error loading wishlist.</p>';
@@ -121,6 +135,22 @@ async function removeFromWishlist(bookId) {
         }
     } catch (error) {
         showToast('An error occurred.', 'error');
+    }
+}
+
+function toggleOrderDetails(orderId) {
+    const detailsRow = document.getElementById(`details-${orderId}`);
+    const toggleIcon = document.querySelector(`.toggle-order[data-order-id="${orderId}"]`);
+    const isExpanded = detailsRow.style.display === 'table-row';
+
+    if (isExpanded) {
+        detailsRow.style.display = 'none';
+        toggleIcon.textContent = '▶';
+    } else {
+        detailsRow.style.display = 'table-row';
+        toggleIcon.textContent = '▼';
+        detailsRow.querySelector('.order-details-content').classList.add('expand-animation');
+        setTimeout(() => detailsRow.querySelector('.order-details-content').classList.remove('expand-animation'), 300);
     }
 }
 

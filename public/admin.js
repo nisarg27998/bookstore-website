@@ -1,13 +1,27 @@
-function getCurrencySymbol() {
-    const testElement = document.createElement('span');
-    testElement.innerHTML = '₹';
-    document.body.appendChild(testElement);
-    const isSupported = testElement.offsetWidth > 0 && testElement.textContent === '₹';
-    document.body.removeChild(testElement);
-    return isSupported ? '₹' : 'INR ';
-}
+async function loadBooks() {
+    const bookListDiv = document.getElementById('manage-books');
+    bookListDiv.innerHTML = '<h3>Manage Books</h3>';
 
-const currencySymbol = getCurrencySymbol();
+    try {
+        const response = await fetch('/api/books');
+        const books = await response.json();
+
+        books.forEach(book => {
+            const bookDiv = document.createElement('div');
+            bookDiv.className = 'book-item';
+            bookDiv.innerHTML = `
+                <span>${book.title} by ${book.author} (${book.category}) - ${window.currencySymbol}${book.price.toFixed(2)} (Stock: ${book.stock})</span>
+                <div>
+                    <button onclick="showEditModal('${book._id}', '${book.title}', '${book.author}', ${book.price}, ${book.stock}, '${book.coverUrl || ''}', '${book.description || ''}', '${book.authorBio || ''}', '${book.category}')">Edit</button>
+                    <button onclick="deleteBook('${book._id}')">Delete</button>
+                </div>
+            `;
+            bookListDiv.appendChild(bookDiv);
+        });
+    } catch (error) {
+        bookListDiv.innerHTML += '<p>Error loading books.</p>';
+    }
+}
 
 document.getElementById('add-book-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -15,7 +29,7 @@ document.getElementById('add-book-form').addEventListener('submit', async (e) =>
     const bookData = {
         title: document.getElementById('title').value,
         author: document.getElementById('author').value,
-        genre: document.getElementById('genre').value,
+        category: document.getElementById('category').value,
         price: parseFloat(document.getElementById('price').value),
         stock: parseInt(document.getElementById('stock').value),
         coverUrl: document.getElementById('coverUrl').value || undefined,
@@ -35,64 +49,69 @@ document.getElementById('add-book-form').addEventListener('submit', async (e) =>
             e.target.reset();
             loadBooks();
         } else {
-            document.getElementById('message').textContent = 'Failed to add book.';
+            const data = await response.json();
+            document.getElementById('message').textContent = data.error || 'Failed to add book.';
             document.getElementById('message').style.color = '#dc3545';
         }
     } catch (error) {
-        document.getElementById('message').textContent = 'An error occurred.';
+        document.getElementById('message').textContent = 'An error occurred: ' + error.message;
         document.getElementById('message').style.color = '#dc3545';
     }
 });
 
-async function loadBooks() {
-    const bookList = document.getElementById('book-list');
-    bookList.innerHTML = '';
-
-    try {
-        const response = await fetch('/api/books');
-        const books = await response.json();
-
-        books.forEach(book => {
-            const bookDiv = document.createElement('div');
-            bookDiv.className = 'book-item';
-            bookDiv.innerHTML = `
-                <p>${book.title} - ${currencySymbol}${book.price.toFixed(2)}</p>
-                <button onclick="showEditModal('${book._id}', '${book.title}', '${book.author}', '${book.genre}', ${book.price}, ${book.stock}, '${book.coverUrl}')">Edit</button>
-                <button onclick="deleteBook('${book._id}')">Delete</button>
-            `;
-            bookList.appendChild(bookDiv);
-        });
-    } catch (error) {
-        bookList.innerHTML = '<p>Error loading books.</p>';
-    }
-}
-
-function showEditModal(bookId, title, author, genre, price, stock, coverUrl, description, authorBio) {
+function showEditModal(bookId, title, author, price, stock, coverUrl, description, authorBio, category) {
     const modal = document.getElementById('edit-modal');
     const form = document.getElementById('edit-book-form');
     
     form.innerHTML = `
-        <label for="edit-title">Title:</label>
-        <input type="text" id="edit-title" value="${title}" required><br>
-        <label for="edit-author">Author:</label>
-        <input type="text" id="edit-author" value="${author}" required><br>
-        <label for="edit-genre">Genre:</label>
-        <input type="text" id="edit-genre" value="${genre}" required><br>
-        <label for="edit-price">Price (₹):</label>
-        <input type="number" id="edit-price" value="${price}" step="0.01" required><br>
-        <label for="edit-stock">Stock:</label>
-        <input type="number" id="edit-stock" value="${stock}" required><br>
-        <label for="edit-coverUrl">Cover URL:</label>
-        <input type="url" id="edit-coverUrl" value="${coverUrl}" placeholder="https://example.com/cover.jpg"><br>
-        <label for="edit-description">Description:</label>
-        <textarea id="edit-description" rows="4">${description || ''}</textarea><br>
-        <label for="edit-authorBio">Author Bio:</label>
-        <textarea id="edit-authorBio" rows="4">${authorBio || ''}</textarea><br>
-        <button type="submit">Save Changes</button>
-        <button type="button" onclick="hideEditModal()">Cancel</button>
+        <div class="form-group">
+            <label for="edit-title">Title</label>
+            <input type="text" id="edit-title" value="${title}" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-author">Author</label>
+            <input type="text" id="edit-author" value="${author}" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-category">Category</label>
+            <select id="edit-category" required>
+                <option value="Fiction" ${category === 'Fiction' ? 'selected' : ''}>Fiction</option>
+                <option value="Non-Fiction" ${category === 'Non-Fiction' ? 'selected' : ''}>Non-Fiction</option>
+                <option value="Mystery" ${category === 'Mystery' ? 'selected' : ''}>Mystery</option>
+                <option value="Science Fiction" ${category === 'Science Fiction' ? 'selected' : ''}>Science Fiction</option>
+                <option value="Fantasy" ${category === 'Fantasy' ? 'selected' : ''}>Fantasy</option>
+                <option value="Biography" ${category === 'Biography' ? 'selected' : ''}>Biography</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="edit-price">Price (${window.currencySymbol})</label>
+            <input type="number" id="edit-price" value="${price}" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-stock">Stock</label>
+            <input type="number" id="edit-stock" value="${stock}" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-coverUrl">Cover URL</label>
+            <input type="url" id="edit-coverUrl" value="${coverUrl || ''}" placeholder="https://example.com/cover.jpg">
+        </div>
+        <div class="form-group">
+            <label for="edit-description">Description</label>
+            <textarea id="edit-description" rows="4" placeholder="Enter book description">${description || ''}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="edit-authorBio">Author Bio</label>
+            <textarea id="edit-authorBio" rows="4" placeholder="Enter author biography">${authorBio || ''}</textarea>
+        </div>
+        <div class="modal-actions">
+            <button type="submit" class="save-button">Save Changes</button>
+            <button type="button" class="cancel-button" onclick="hideEditModal()">Cancel</button>
+        </div>
     `;
 
-    modal.style.display = 'block';
+    modal.classList.remove('modal-exit');
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('modal-enter'), 10); // Trigger animation
 
     form.onsubmit = async (e) => {
         e.preventDefault();
@@ -100,7 +119,7 @@ function showEditModal(bookId, title, author, genre, price, stock, coverUrl, des
         const updatedBook = {
             title: document.getElementById('edit-title').value,
             author: document.getElementById('edit-author').value,
-            genre: document.getElementById('edit-genre').value,
+            category: document.getElementById('edit-category').value,
             price: parseFloat(document.getElementById('edit-price').value),
             stock: parseInt(document.getElementById('edit-stock').value),
             coverUrl: document.getElementById('edit-coverUrl').value || undefined,
@@ -129,7 +148,12 @@ function showEditModal(bookId, title, author, genre, price, stock, coverUrl, des
 
 function hideEditModal() {
     const modal = document.getElementById('edit-modal');
-    modal.style.display = 'none';
+    modal.classList.remove('modal-enter');
+    modal.classList.add('modal-exit');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('modal-exit');
+    }, 300);
 }
 
 async function deleteBook(bookId) {
@@ -150,5 +174,4 @@ async function deleteBook(bookId) {
     }
 }
 
-// Load books on page load
 loadBooks();

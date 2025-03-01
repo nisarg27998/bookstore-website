@@ -8,51 +8,57 @@
 </head>
 <body>
     <main>
-        <section id="add-book">
-            <h2>Add a New Book</h2>
-            <form id="add-book-form">
-                <label for="title">Title:</label>
-                <input type="text" id="title" name="title" required><br>
-                <label for="author">Author:</label>
-                <input type="text" id="author" name="author" required><br>
-                <label for="genre">Genre:</label>
-                <input type="text" id="genre" name="genre" required><br>
-                <label for="price">Price (₹):</label>
-                <input type="number" id="price" name="price" step="0.01" required><br>
-                <label for="stock">Stock:</label>
-                <input type="number" id="stock" name="stock" required><br>
-                <label for="coverUrl">Cover URL:</label>
-                <input type="url" id="coverUrl" name="coverUrl" placeholder="https://example.com/cover.jpg"><br>
-                <button type="submit">Add Book</button>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Enter book description"></textarea>
+        <section id="admin">
+            <h2>Admin Dashboard</h2>
+            <div id="add-book">
+                <h3>Add New Book</h3>
+                <form id="add-book-form">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" required><br>
+                    <label for="author">Author:</label>
+                    <input type="text" id="author" required><br>
+                    <label for="category">Category:</label>
+                    <select id="category" required>
+                        <option value="Fiction">Fiction</option>
+                        <option value="Non-Fiction">Non-Fiction</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Science Fiction">Science Fiction</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Biography">Biography</option>
+                    </select><br>
+                    <label for="price">Price (₹):</label>
+                    <input type="number" id="price" step="0.01" required><br>
+                    <label for="stock">Stock:</label>
+                    <input type="number" id="stock" required><br>
+                    <label for="coverUrl">Cover URL:</label>
+                    <input type="url" id="coverUrl" placeholder="https://example.com/cover.jpg"><br>
+                    <label for="description">Description:</label>
+                    <textarea id="description" rows="4" placeholder="Enter book description"></textarea><br>
+                    <label for="authorBio">Author Bio:</label>
+                    <textarea id="authorBio" rows="4" placeholder="Enter author biography"></textarea><br>
+                    <button type="submit">Add Book</button>
+                </form>
+                <p id="message"></p>
+            </div>
+            <div id="manage-books">
+                <h3>Manage Books</h3>
+                <!-- Book list will be populated dynamically -->
+            </div>
+            <div id="edit-modal" class="modal" style="display: none;">
+                <div class="modal-content edit-book-modal">
+                    <span class="close-modal" onclick="hideEditModal()">×</span>
+                    <h3>Edit Book</h3>
+                    <form id="edit-book-form" class="edit-book-form">
+                        <!-- Form fields will be populated dynamically -->
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="authorBio">Author Bio</label>
-                    <textarea id="authorBio" name="authorBio" rows="4" placeholder="Enter author biography"></textarea>
-                </div>
-            </form>
-            <p id="message"></p>
-        </section>
-        <section id="manage-books">
-            <h2>Manage Books</h2>
-            <div id="book-list"></div>
+            </div>
         </section>
     </main>
-    <div id="edit-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h3>Edit Book</h3>
-            <form id="edit-book-form">
-                <!-- Form fields will be populated dynamically -->
-            </form>
-        </div>
-    </div>
     <footer>
         <p>© 2025 Bookstore</p>
     </footer>
     <script src="include-header.js"></script>
-    <script src="toast.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>

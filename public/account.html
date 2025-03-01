@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account - Bookstore</title>
+    <title>Login/Register - Bookstore</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <main>
-        <section id="auth" class="auth-container">
-            <div class="auth-card">
-                <h2>Login</h2>
+        <section id="auth" class="auth-card">
+            <h2>Login or Register</h2>
+            <div class="toggle-switch">
+                <button id="login-tab" class="toggle-button active">Login</button>
+                <button id="register-tab" class="toggle-button">Register</button>
+            </div>
+            <div id="login-form-container" class="form-container active">
                 <form id="login-form" class="auth-form">
                     <div class="form-group">
                         <label for="login-email">Email</label>
@@ -24,8 +28,7 @@
                 </form>
                 <p id="login-message" class="message"></p>
             </div>
-            <div class="auth-card">
-                <h2>Register</h2>
+            <div id="register-form-container" class="form-container">
                 <form id="register-form" class="auth-form">
                     <div class="form-group">
                         <label for="register-firstName">First Name</label>

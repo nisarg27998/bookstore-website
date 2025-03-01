@@ -10,15 +10,24 @@
     <main>
         <section id="welcome">
             <h1>Welcome to Bookstore</h1>
-            <p>Browse our collection of books below, or use the search and filter options above to find your next read!</p>
+            <p>Browse our collection of books below by selecting a category!</p>
         </section>
         <section id="book-list" class="book-list-container">
             <h2>Our Books</h2>
+            <div id="category-list" class="category-list">
+                <button class="category-button active" data-category="all">All Categories</button>
+                <button class="category-button" data-category="Fiction">Fiction</button>
+                <button class="category-button" data-category="Non-Fiction">Non-Fiction</button>
+                <button class="category-button" data-category="Mystery">Mystery</button>
+                <button class="category-button" data-category="Science Fiction">Science Fiction</button>
+                <button class="category-button" data-category="Fantasy">Fantasy</button>
+                <button class="category-button" data-category="Biography">Biography</button>
+            </div>
             <div id="book-container"></div>
         </section>
         <div id="book-modal" class="modal" style="display: none;">
             <div class="modal-content book-modal-content">
-                <span class="close-modal" onclick="closeBookModal()">&times;</span>
+                <span class="close-modal" onclick="closeBookModal()">×</span>
                 <div id="book-details"></div>
             </div>
         </div>

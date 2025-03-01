@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const Book = require('../models/book');
 const User = require('../models/user');
+const Review = require('../models/review'); // New import
 
 const app = express();
 
@@ -91,7 +92,7 @@ app.get('/api/books', async (req, res) => {
 app.post('/api/register', async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
-        return res.status(400).json({ error: 'All fields (first name, last name, email, password) are required.' });
+        return res.status(400).json({ error: 'All fields are required.' });
     }
 
     try {
@@ -211,13 +212,29 @@ app.get('/api/orders', isAuthenticated, async (req, res) => {
 });
 
 app.post('/api/books', isAdmin, async (req, res) => {
-    const { title, author, genre, price, stock, coverUrl } = req.body;
+    const { title, author, category, price, stock, coverUrl, description, authorBio } = req.body;
+
+    // Validate required fields
+    if (!title || !author || !category || !price || !stock) {
+        return res.status(400).json({ error: 'Missing required fields: title, author, category, price, stock are required' });
+    }
+
     try {
-        const newBook = new Book({ title, author, genre, price, stock, coverUrl });
+        const newBook = new Book({
+            title,
+            author,
+            category,
+            price,
+            stock,
+            coverUrl: coverUrl || undefined,
+            description: description || undefined,
+            authorBio: authorBio || undefined
+        });
         await newBook.save();
         res.status(201).json({ message: 'Book added', book: newBook });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to add book' });
+        console.error('Error adding book:', error); // Log the error for debugging
+        res.status(500).json({ error: 'Failed to add book: ' + error.message });
     }
 });
 
@@ -246,7 +263,6 @@ app.delete('/api/books/:id', isAdmin, async (req, res) => {
     }
 });
 
-// New profile endpoints
 app.get('/api/user', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.userId);
     res.json({ firstName: user.firstName, lastName: user.lastName, email: user.email });
@@ -288,6 +304,49 @@ app.delete('/api/wishlist/:bookId', isAuthenticated, async (req, res) => {
     user.wishlist = user.wishlist.filter(id => id.toString() !== bookId);
     await user.save();
     res.json({ message: 'Removed from wishlist' });
+});
+
+// New review endpoints
+app.post('/api/reviews', isAuthenticated, async (req, res) => {
+    const { bookId, rating, comment } = req.body;
+    const userId = req.session.userId;
+
+    if (!bookId || !rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Book ID and valid rating (1-5) are required.' });
+    }
+
+    try {
+        // Check if user already reviewed this book
+        const existingReview = await Review.findOne({ bookId, userId });
+        if (existingReview) {
+            return res.status(400).json({ error: 'You have already reviewed this book.' });
+        }
+
+        const review = new Review({ bookId, userId, rating, comment });
+        await review.save();
+
+        // Update book's average rating
+        const reviews = await Review.find({ bookId });
+        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        const book = await Book.findById(bookId);
+        book.ratings.average = totalRating / reviews.length;
+        book.ratings.count = reviews.length;
+        await book.save();
+
+        res.status(201).json({ message: 'Review submitted', review });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to submit review: ' + error.message });
+    }
+});
+
+app.get('/api/reviews/:bookId', async (req, res) => {
+    const { bookId } = req.params;
+    try {
+        const reviews = await Review.find({ bookId }).populate('userId', 'firstName lastName');
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch reviews' });
+    }
 });
 
 app.listen(3000, () => {

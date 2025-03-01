@@ -10,6 +10,7 @@ function getCurrencySymbol() {
 window.currencySymbol = getCurrencySymbol();
 
 let allBooks = [];
+let selectedCategory = 'all';
 
 async function loadHeader() {
     try {
@@ -23,19 +24,21 @@ async function loadHeader() {
         const adminLink = document.querySelector('nav a[href="/admin"]');
         const ordersLink = document.querySelector('nav a[href="/orders"]');
         const profileLink = document.querySelector('nav a[href="/profile"]');
+        const accountLink = document.querySelector('nav a[href="/account"]');
         const usernameDisplay = document.getElementById('username-display');
-        const searchFilter = document.querySelector('.search-filter');
 
         if (isLoggedIn) {
             logoutBtn.style.display = 'inline-block';
             ordersLink.style.display = 'inline-block';
             profileLink.style.display = 'inline-block';
+            accountLink.style.display = 'none';
             usernameDisplay.style.display = 'inline-block';
             usernameDisplay.textContent = `Welcome, ${firstName}`;
         } else {
             logoutBtn.style.display = 'none';
             ordersLink.style.display = 'none';
             profileLink.style.display = 'none';
+            accountLink.style.display = 'inline-block';
             usernameDisplay.style.display = 'none';
         }
 
@@ -46,11 +49,6 @@ async function loadHeader() {
         }
 
         const currentPath = window.location.pathname;
-        if (currentPath === '/') {
-            searchFilter.style.display = 'flex';
-        } else {
-            searchFilter.style.display = 'none';
-        }
 
         logoutBtn.addEventListener('click', async () => {
             try {
@@ -76,44 +74,26 @@ async function loadHeader() {
         if (currentPath === '/') {
             const booksResponse = await fetch('/api/books');
             allBooks = await booksResponse.json();
-            const genreFilter = document.getElementById('genre-filter');
-            const genres = [...new Set(allBooks.map(book => book.genre))];
-            genres.forEach(genre => {
-                const option = document.createElement('option');
-                option.value = genre;
-                option.textContent = genre;
-                genreFilter.appendChild(option);
+            displayBooks(allBooks);
+
+            // Add category button listeners
+            const categoryButtons = document.querySelectorAll('.category-button');
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    selectedCategory = button.getAttribute('data-category');
+                    displayBooksByCategory();
+                });
             });
 
-            document.getElementById('search-input').addEventListener('input', filterBooks);
-            document.getElementById('genre-filter').addEventListener('change', filterBooks);
-
-            displayBooks(allBooks);
+            // Animate category list on load
+            const categoryList = document.getElementById('category-list');
+            setTimeout(() => categoryList.classList.add('loaded'), 100);
         }
     } catch (error) {
         console.error('Error loading header:', error);
     }
-}
-
-function filterBooks() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const selectedGenre = document.getElementById('genre-filter').value;
-
-    let filteredBooks = allBooks;
-
-    if (searchTerm) {
-        filteredBooks = filteredBooks.filter(book => 
-            book.title.toLowerCase().includes(searchTerm)
-        );
-    }
-
-    if (selectedGenre) {
-        filteredBooks = filteredBooks.filter(book => 
-            book.genre === selectedGenre
-        );
-    }
-
-    displayBooks(filteredBooks);
 }
 
 function displayBooks(books) {
@@ -121,7 +101,7 @@ function displayBooks(books) {
     if (!bookContainer) return;
     bookContainer.innerHTML = '';
 
-    books.forEach(book => {
+    books.forEach((book, index) => {
         const bookCard = document.createElement('div');
         bookCard.className = 'book-card';
         bookCard.innerHTML = `
@@ -133,10 +113,19 @@ function displayBooks(books) {
         `;
         bookCard.addEventListener('click', () => showBookModal(book));
         bookContainer.appendChild(bookCard);
+
+        setTimeout(() => {
+            bookCard.classList.add('fade-in');
+        }, index * 100);
     });
 }
 
-function showBookModal(book) {
+function displayBooksByCategory() {
+    const filteredBooks = selectedCategory === 'all' ? allBooks : allBooks.filter(book => book.category === selectedCategory);
+    displayBooks(filteredBooks);
+}
+
+async function showBookModal(book) {
     const modal = document.getElementById('book-modal');
     const details = document.getElementById('book-details');
     
@@ -152,13 +141,98 @@ function showBookModal(book) {
             <button onclick="addToCart('${book._id}', '${book.title}')">Add to Cart</button>
             <button onclick="addToWishlist('${book._id}', '${book.title}')">Add to Wishlist</button>
         </div>
+        <div class="review-section">
+            <h3>Rate & Review</h3>
+            <form id="review-form-${book._id}">
+                <div class="star-rating">
+                    <input type="radio" id="star5-${book._id}" name="rating" value="5"><label for="star5-${book._id}">★</label>
+                    <input type="radio" id="star4-${book._id}" name="rating" value="4"><label for="star4-${book._id}">★</label>
+                    <input type="radio" id="star3-${book._id}" name="rating" value="3"><label for="star3-${book._id}">★</label>
+                    <input type="radio" id="star2-${book._id}" name="rating" value="2"><label for="star2-${book._id}">★</label>
+                    <input type="radio" id="star1-${book._id}" name="rating" value="1"><label for="star1-${book._id}">★</label>
+                </div>
+                <textarea id="review-comment-${book._id}" placeholder="Write your review..." rows="3"></textarea>
+                <button type="submit">Submit Review</button>
+            </form>
+            <p id="review-message-${book._id}" class="review-message"></p>
+            <div class="reviews-list" id="reviews-list-${book._id}">
+                <h3>Reviews</h3>
+                <div class="reviews-container"></div>
+            </div>
+        </div>
     `;
     
+    modal.classList.remove('modal-exit');
     modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('modal-enter'), 10);
+
+    try {
+        const response = await fetch(`/api/reviews/${book._id}`);
+        const reviews = await response.json();
+        const reviewsContainer = document.querySelector(`#reviews-list-${book._id} .reviews-container`);
+        if (reviews.length === 0) {
+            reviewsContainer.innerHTML = '<p>No reviews yet.</p>';
+        } else {
+            reviews.forEach(review => {
+                const reviewDiv = document.createElement('div');
+                reviewDiv.className = 'review-item';
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                reviewDiv.innerHTML = `
+                    <p><strong>${review.userId.firstName} ${review.userId.lastName}</strong> - ${stars}</p>
+                    <p>${review.comment || 'No comment'}</p>
+                    <p class="review-date">${new Date(review.date).toLocaleDateString()}</p>
+                `;
+                reviewsContainer.appendChild(reviewDiv);
+            });
+        }
+    } catch (error) {
+        document.querySelector(`#reviews-list-${book._id} .reviews-container`).innerHTML = '<p>Error loading reviews.</p>';
+    }
+
+    document.getElementById(`review-form-${book._id}`).addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rating = document.querySelector(`input[name="rating"]:checked`)?.value;
+        const comment = document.getElementById(`review-comment-${book._id}`).value;
+
+        if (!rating) {
+            showToast('Please select a rating.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookId: book._id, rating: parseInt(rating), comment })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById(`review-message-${book._id}`).textContent = 'Review submitted successfully!';
+                document.getElementById(`review-message-${book._id}`).style.color = '#28a745';
+                showToast('Review submitted successfully!');
+                setTimeout(() => {
+                    closeBookModal();
+                    loadHeader();
+                }, 1000);
+            } else {
+                document.getElementById(`review-message-${book._id}`).textContent = data.error || 'Failed to submit review.';
+                document.getElementById(`review-message-${book._id}`).style.color = '#dc3545';
+                showToast(data.error || 'Failed to submit review.', 'error');
+            }
+        } catch (error) {
+            showToast('An error occurred.', 'error');
+        }
+    });
 }
 
 function closeBookModal() {
-    document.getElementById('book-modal').style.display = 'none';
+    const modal = document.getElementById('book-modal');
+    modal.classList.remove('modal-enter');
+    modal.classList.add('modal-exit');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('modal-exit');
+    }, 300);
 }
 
 async function addToCart(bookId, title) {
